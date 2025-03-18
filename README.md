@@ -1,7 +1,5 @@
 ## Make it Simple.
 
----
-
 ### Blogs & Posts
 
 <p align="left" style='display:flex; gap:1rem'>
