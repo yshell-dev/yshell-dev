@@ -2,7 +2,7 @@
 
 ---
 
-### Blogs and Posts
+### Blogs & Posts
 
 <p align="left" style='display:flex; gap:1rem'>
 <a href="https://dev.to/vyshnavprasad" target="blank"><img align="center" src="public/static/svg/dev-to.svg" alt="dev.to" height="40" width="40" /></a>
