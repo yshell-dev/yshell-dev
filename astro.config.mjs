@@ -1,12 +1,9 @@
-import sitemap from '@astrojs/sitemap';
-import tailwind from '@astrojs/tailwind';
-import vercel from '@astrojs/vercel';
 import { defineConfig } from 'astro/config';
+import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
 
-// https://astro.build/config
 export default defineConfig({
-	site: 'https://astro-simple-portfolio.vercel.app/', // Required for sitemap -> Replace with your site's URL
+	site: 'https://yourusername.github.io/your-repo-name/', // required for sitemap & assets
 	output: 'static',
 	integrations: [tailwind(), sitemap()],
-	adapter: vercel(),
 });
