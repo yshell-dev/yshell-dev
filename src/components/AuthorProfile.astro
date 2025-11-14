@@ -1,0 +1,58 @@
+---
+import AvatarComponent from '@/components/ui/avatar'
+import type { Link as SocialLink } from '@/consts'
+import { cn } from '@/lib/utils'
+import type { CollectionEntry } from 'astro:content'
+import SocialIcons from './SocialIcons.astro'
+
+type Props = {
+  mention: CollectionEntry<'mention'>
+  linkDisabled?: boolean
+}
+const { mention, linkDisabled = false } = Astro.props
+const {
+  title,
+  avatar,
+  description,
+  pronouns,
+  github,
+  linkedin,
+  website,
+  email,
+} = mention.data
+
+const socialLinks: SocialLink[] = [
+  website && { href: website, label: 'Website' },
+  github && { href: github, label: 'GitHub' },
+  linkedin && { href: linkedin, label: 'LinkedIn' },
+  email && { href: email, label: 'Email' },
+].filter(Boolean) as SocialLink[]
+---
+
+<div class="flex flex-col gap-6">
+  <div class="inline">
+    <AvatarComponent
+      client:load
+      src={avatar}
+      alt={`Avatar of ${title}`}
+      fallback={title[0]}
+      className={cn(
+        'size-28 rounded-md',
+        !linkDisabled &&
+          'transition-shadow duration-300 hover:cursor-pointer hover:ring-2 hover:ring-primary'
+      )}
+    />
+  </div>
+  <div class="flex flex-grow flex-col gap-2">
+    <div class="flex flex-wrap items-center gap-4">
+      <h3 class="text-lg font-semibold">{title}</h3>
+      {
+        pronouns && (
+          <span class="text-sm text-muted-foreground">({pronouns})</span>
+        )
+      }
+    </div>
+    <p class="pb-4 text-sm text-muted-foreground">{description}</p>
+    <SocialIcons links={socialLinks} />
+  </div>
+</div>

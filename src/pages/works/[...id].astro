@@ -1,0 +1,125 @@
+---
+import BlogCard from '@/components/BlogCard.astro'
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import PostNavigation from '@/components/PostNavigation.astro'
+import { Button } from '@/components/ui/button'
+import WorkProfile from '@/components/WorkProfile.astro'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('work')).filter((post) => !post.data.draft)
+  return posts.map((posts) => ({
+    params: { id: posts.id },
+    props: posts,
+  }))
+}
+type Props = CollectionEntry<'work'>
+
+const posts = (await getCollection('work'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+
+function getPostIndex(id: string): number {
+  return posts.findIndex((post) => post.id === id)
+}
+
+function getPrevPost(id: string): Props | null {
+  const postIndex = getPostIndex(id)
+  return postIndex !== -1 && postIndex < posts.length - 1
+    ? posts[postIndex + 1]
+    : null
+}
+
+function getNextPost(id: string): Props | null {
+  const postIndex = getPostIndex(id)
+  return postIndex > 0 ? posts[postIndex - 1] : null
+}
+
+const currentPostId = Astro.params.id
+const nextPost = getNextPost(currentPostId)
+const prevPost = getPrevPost(currentPostId)
+
+const post = Astro.props
+const { Content } = await render(post)
+
+const works = (await getCollection('blog')).filter(
+  (blog) => blog.data.work === post.data.slug
+)
+---
+
+<Layout
+  title={post.data.title}
+  description={post.data.description}
+  image={post.data.logo?.src ?? '/static/cover.png'}
+>
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs
+      items={[
+        { href: '/blogs', label: 'Blog', icon: 'lucide:archive' },
+        { label: post.data.title, icon: 'lucide:file-text' },
+      ]}
+      class="col-start-2"
+    />
+    <!-- <PostNavigation prevPost={prevPost} nextPost={nextPost} baseUrl="works" /> -->
+
+    <WorkProfile work={post} />
+    <article
+      class="prose prose-neutral col-start-2 max-w-none dark:prose-invert"
+    >
+      <Content />
+    </article>
+    <section class='flex flex-col gap-y-4'>
+      <h2 class="text-2xl font-bold">Related Blogs</h2>
+      <ul class="not-prose flex flex-col gap-4">
+        {
+          works.map((blog) => (
+            <li>
+              <BlogCard entry={blog} />
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+    <PostNavigation prevPost={prevPost} nextPost={nextPost} baseUrl="works" />
+
+    <Button
+      variant="outline"
+      size="icon"
+      className="group fixed bottom-8 right-8 z-50 hidden"
+      id="scroll-to-top"
+      title="Scroll to top"
+      aria-label="Scroll to top"
+    >
+      <Icon
+        name="lucide:arrow-up"
+        class="mx-auto size-4 transition-all group-hover:-translate-y-0.5"
+      />
+    </Button>
+
+    <script>
+      document.addEventListener('astro:page-load', () => {
+        const scrollToTopButton = document.getElementById('scroll-to-top')
+        const footer = document.querySelector('footer')
+
+        if (scrollToTopButton && footer) {
+          scrollToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          })
+
+          window.addEventListener('scroll', () => {
+            const footerRect = footer.getBoundingClientRect()
+            const isFooterVisible = footerRect.top <= window.innerHeight
+
+            scrollToTopButton.classList.toggle(
+              'hidden',
+              window.scrollY <= 300 || isFooterVisible
+            )
+          })
+        }
+      })
+    </script>
+  </Container>
+</Layout>

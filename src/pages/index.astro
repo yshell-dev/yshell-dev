@@ -1,0 +1,89 @@
+---
+import BlogCard from '@/components/BlogCard.astro'
+import Container from '@/components/Container.astro'
+import Link from '@/components/Link.astro'
+import ShotCard from '@/components/ShotCard.astro'
+import WorkShortcut from '@/components/WorkShortcut.astro'
+import { buttonVariants } from '@/components/ui/button'
+import { SITE } from '@/consts'
+import Layout from '@/layouts/Layout.astro'
+import { getCollection, type CollectionEntry } from 'astro:content'
+
+const blogs = (await getCollection('blog'))
+  .filter((post: CollectionEntry<'blog'>) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE)
+
+const works = (await getCollection('work')).filter(
+  (work: CollectionEntry<'work'>) => !work.data.draft,
+)
+
+const shots = (await getCollection('shot'))
+  .filter((shot: CollectionEntry<'shot'>) => !shot.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE)
+---
+
+<Layout title="Home" description={SITE.DESCRIPTION}>
+  <Container class="flex flex-col gap-y-6 pb-8">
+    <section class="flex flex-col">
+      <ul class="not-prose flex flex-wrap items-stretch ">
+        {
+          works.map((work) => (
+            <li class="w-1/3 p-2 sm:w-1/6">
+              <WorkShortcut entry={work} />
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+    <section class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-bold">Latest shots</h2>
+      <ul
+        class="not-prose flex flex-wrap items-stretch sm:flex-nowrap"
+      >
+        {
+          shots.map((shot) => (
+            <li class="w-full p-2 sm:w-1/3">
+              <ShotCard entry={shot} />
+            </li>
+          ))
+        }
+      </ul>
+      <div class="flex justify-center">
+        <Link
+          href="/shots"
+          class={buttonVariants({ variant: 'ghost' }) + ' group'}
+        >
+          See all shots <span
+            class="ml-1.5 transition-transform group-hover:translate-x-1"
+            >&rarr;</span
+          >
+        </Link>
+      </div>
+    </section>
+    <section class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-bold">Latest blogs</h2>
+      <ul class="not-prose flex flex-col gap-y-4">
+        {
+          blogs.map((blog) => (
+            <li>
+              <BlogCard entry={blog} />
+            </li>
+          ))
+        }
+      </ul>
+      <div class="flex justify-center">
+        <Link
+          href="/blogs"
+          class={buttonVariants({ variant: 'ghost' }) + ' group'}
+        >
+          See all posts <span
+            class="ml-1.5 transition-transform group-hover:translate-x-1"
+            >&rarr;</span
+          >
+        </Link>
+      </div>
+    </section>
+  </Container>
+</Layout>

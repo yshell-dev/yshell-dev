@@ -1,0 +1,69 @@
+---
+import BlogCard from '@/components/BlogCard.astro'
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+import { type CollectionEntry, getCollection } from 'astro:content'
+
+type BlogPost = CollectionEntry<'blog'>
+
+type Props = {
+  tag: string
+  blogs: BlogPost[]
+}
+const { tag, blogs } = Astro.props
+
+export async function getStaticPaths() {
+  const blogs = await getCollection('blog')
+  const tags = blogs.flatMap((post) => post.data.tags || [])
+  const uniqueTags = Array.from(
+    new Set(tags.filter((tag): tag is string => typeof tag === 'string')),
+  )
+
+  return uniqueTags.map((tag) => ({
+    params: { id: tag },
+    props: {
+      tag,
+      blogs: blogs.filter((post) => post.data.tags?.includes(tag)),
+    },
+  }))
+}
+---
+
+<Layout
+  title={`blogs tagged with "${tag}"`}
+  description={`A collection of blogs tagged with ${tag}.`}
+>
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs
+      items={[
+        { href: '/tags', label: 'Tags', icon: 'lucide:tags' },
+        { label: tag, icon: 'lucide:tag' },
+      ]}
+    />
+    <div class="flex flex-wrap items-center gap-2">
+      <h1 class="text-3xl font-semibold">blogs tagged with</h1>
+      <span
+        class="flex items-center gap-x-1 rounded-full bg-secondary px-4 py-2 text-2xl font-semibold"
+      >
+        <Icon name="lucide:hash" class="size-6 -translate-x-0.5" />{tag}
+      </span>
+    </div>
+    <div class="flex flex-col gap-y-4">
+      {
+        blogs.map((post) => (
+          <section class="flex flex-col gap-y-4">
+            <div>
+              <ul class="not-prose flex flex-col gap-4">
+                <li>
+                  <BlogCard entry={post} />
+                </li>
+              </ul>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </Container>
+</Layout>

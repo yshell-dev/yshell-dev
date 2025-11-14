@@ -1,0 +1,83 @@
+---
+import Link from '@/components/Link.astro'
+import { Separator } from '@/components/ui/separator'
+import type { Link as SocialLink } from '@/consts'
+import { parseAuthors } from '@/lib/server-utils'
+import { Image } from 'astro:assets'
+import type { CollectionEntry } from 'astro:content'
+import SocialIcons from './SocialIcons.astro'
+
+type Props = {
+  work: CollectionEntry<'work'>
+}
+const { work } = Astro.props
+
+const { title, slug, version, logo, cover, website, github, discord } =
+  work.data
+const contributors = await parseAuthors(work.data.contributors ?? [])
+
+const socialLinks: SocialLink[] = [
+  website && { href: website, label: 'Website' },
+  github && { href: github, label: 'GitHub' },
+  discord && { href: discord, label: 'Discord' },
+].filter(Boolean) as SocialLink[]
+---
+
+<section class="flex flex-col gap-8 py-6">
+  <div class="flex flex-col gap-6">
+    <div class="flex gap-6">
+      <!-- inferSize added to allow remote image URLs (e.g., external logos) to be used without explicit width/height -->
+      <Image
+        src={logo}
+        alt={slug}
+        inferSize={true}
+        class="object-fit w-1/4"
+      />
+      <div>
+        <h1 class="pb-1 text-2xl font-bold leading-tight sm:text-4xl">
+          {title}
+        </h1>
+        <span>{version}</span>
+      </div>
+    </div>
+    <SocialIcons links={socialLinks} />
+    <div>
+      <h3 class="pb-3 text-xl font-bold leading-tight">Contributors</h3>
+      <div class="flex flex-wrap gap-2 text-sm text-muted-foreground">
+        {
+          contributors.length > 0 && (
+            <div class="flex flex-wrap gap-x-2">
+              {contributors.length
+                ? contributors.map((contributor) => (
+                    <div class="flex items-center gap-x-2">
+                      <Image
+                        src={contributor.avatar}
+                        alt={contributor.name}
+                        width={16}
+                        height={16}
+                        class="rounded-full"
+                      />
+                      {contributor.isRegistered ? (
+                        <Link
+                          href={`/mentions/${contributor.id}`}
+                          underline
+                          class="text-foreground"
+                        >
+                          <span>{contributor.name}</span>
+                        </Link>
+                      ) : (
+                        <span>{contributor.name}</span>
+                      )}
+                      <Separator orientation="vertical" className="h-4" />
+                    </div>
+                  ))
+                : null}
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+  <!-- inferSize added for remote cover images to avoid MissingImageDimension errors -->
+  <Image src={cover} alt={title} inferSize={true} class="p-1 " />
+</section>

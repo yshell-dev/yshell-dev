@@ -1,0 +1,167 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Link from '@/components/Link.astro'
+import PostNavigation from '@/components/PostNavigation.astro'
+import { Button } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+import { formatDate } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('shot'))
+    .filter((post: CollectionEntry<'shot'>) => !post.data.draft)
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: post,
+  }))
+}
+type Props = CollectionEntry<'shot'>
+
+const posts = (await getCollection('shot'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+
+function getPostIndex(id: string): number {
+  return posts.findIndex((post) => post.id === id)
+}
+
+function getPrevPost(id: string): Props | null {
+  const postIndex = getPostIndex(id)
+  return postIndex !== -1 && postIndex < posts.length - 1
+    ? posts[postIndex + 1]
+    : null
+}
+
+function getNextPost(id: string): Props | null {
+  const postIndex = getPostIndex(id)
+  return postIndex > 0 ? posts[postIndex - 1] : null
+}
+
+const currentPostId = Astro.params.id
+const nextPost = getNextPost(currentPostId)
+const prevPost = getPrevPost(currentPostId)
+
+const post = Astro.props
+const { Content } = await render(post)
+
+const author = (await getCollection('mention')).find(
+  (mention) => post.data.author === mention.data.title
+)
+---
+
+<Layout
+  title={post.data.title}
+  description={post.data.description}
+  image={post.data.cover?.src ?? '/static/cover.png'}
+>
+  <section
+    class="grid grid-cols-[minmax(0px,1fr)_min(768px,100%)_minmax(0px,1fr)] gap-y-6 *:px-4"
+  >
+    <Breadcrumbs
+      items={[
+        { href: '/shots', label: 'shot', icon: 'lucide:archive' },
+        { label: post.data.title, icon: 'lucide:file-text' },
+      ]}
+      class="col-start-2"
+    />
+    <section class="col-start-2 flex flex-col gap-y-2">
+      <span>{formatDate(post.data.date)}</span>
+      <h1 class="text-4xl font-bold leading-tight sm:text-5xl">
+        {post.data.title}
+      </h1>
+      {
+        author ? (
+          <div class="flex items-center gap-x-2">
+            <Image
+              src={author.data.avatar}
+              alt={author.data.title}
+              width={16}
+              height={16}
+              class="rounded-full"
+            />
+            <Link
+              href={`/mentions/${author.id}`}
+              underline
+              class="text-foreground"
+            >
+              <span>{author.data.title}</span>
+            </Link>
+          </div>
+        ) : null
+      }
+    </section>
+    <section class="col-start-2 flex flex-col gap-y-2">
+      <ul class="flex flex-wrap">
+        {
+          post.data.pages ? (
+            post.data.pages.map((i) => (
+              <li class="w-1/2 sm:w-1/3 p-0.5">
+                <Image
+                  src={i}
+                  alt={post.data.title}
+                  class="col-span-full mx-auto w-full max-w-[1000px] object-cover rounded-md"
+                />
+              </li>
+            ))
+          ) : (
+            <li>
+              <Image
+                src={post.data.cover}
+                alt={post.data.title}
+                class="col-span-full mx-auto w-full max-w-[1000px] object-cover"
+              />
+            </li>
+          )
+        }
+      </ul>
+    </section>
+
+    <article
+      class="prose prose-neutral col-start-2 max-w-none dark:prose-invert"
+    >
+      <Content />
+    </article>
+
+    <PostNavigation prevPost={prevPost} baseUrl="shots" nextPost={nextPost} />
+  </section>
+
+  <Button
+    variant="outline"
+    size="icon"
+    className="group fixed bottom-8 right-8 z-50 hidden"
+    id="scroll-to-top"
+    title="Scroll to top"
+    aria-label="Scroll to top"
+  >
+    <Icon
+      name="lucide:arrow-up"
+      class="mx-auto size-4 transition-all group-hover:-translate-y-0.5"
+    />
+  </Button>
+
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const scrollToTopButton = document.getElementById('scroll-to-top')
+      const footer = document.querySelector('footer')
+
+      if (scrollToTopButton && footer) {
+        scrollToTopButton.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+
+        window.addEventListener('scroll', () => {
+          const footerRect = footer.getBoundingClientRect()
+          const isFooterVisible = footerRect.top <= window.innerHeight
+
+          scrollToTopButton.classList.toggle(
+            'hidden',
+            window.scrollY <= 300 || isFooterVisible
+          )
+        })
+      }
+    })
+  </script>
+</Layout>

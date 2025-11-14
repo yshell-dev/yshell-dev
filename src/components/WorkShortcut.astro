@@ -1,0 +1,23 @@
+---
+import { Image } from 'astro:assets'
+import type { CollectionEntry } from 'astro:content'
+import Link from './Link.astro'
+
+const { entry } = Astro.props as { entry: CollectionEntry<'work'> }
+---
+
+<Link
+  href={`/works/${entry.id}`}
+  class="flex flex-col items-center gap-4 rounded-md p-2 transition-colors duration-300 ease-in-out hover:bg-secondary/50"
+>
+  <!-- inferSize added to support external logo URLs without explicit width/height -->
+  <Image
+    src={entry.data.logo}
+    alt={entry.data.title}
+    inferSize={true}
+    class="object-fit  p-1"
+  />
+  <h6 class="font-semibold text-muted-foreground">
+    {entry.data.title}
+  </h6>
+</Link>

@@ -1,0 +1,93 @@
+---
+import AuthorProfile from '@/components/AuthorProfile.astro'
+import BlogCard from '@/components/BlogCard.astro'
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import WorkShortcut from '@/components/WorkShortcut.astro'
+import Layout from '@/layouts/Layout.astro'
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const authors = await getCollection('mention')
+  return authors.map((author) => ({
+    params: { id: author.id },
+    props: { author },
+  }))
+}
+
+type Props = {
+  author: CollectionEntry<'mention'>
+}
+
+const { author } = Astro.props
+
+const allBlogs = await getCollection('blog')
+const allWorks = await getCollection('work')
+const authorPosts = allBlogs
+  .filter((blog) => {
+    return blog.data.authors && blog.data.authors.includes(author.id)
+  })
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+const contributedWorks = allWorks
+  .filter((work: CollectionEntry<'work'>) => !work.data.draft)
+  .filter((work) => {
+    return work.data.contributors && work.data.contributors.includes(author.id)
+  })
+  
+const { Content } = await render(author)
+---
+
+<Layout
+  title={`${author.data.title} (Author)`}
+  description={author.data.description || `Profile of ${author.data.title}.`}
+>
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs
+      items={[
+        { href: '/mentions', label: 'Mentions', icon: 'lucide:users' },
+        { label: author.data.title, icon: 'lucide:user' },
+      ]}
+    />
+
+    <section class="rounded-xl border p-4">
+      <AuthorProfile mention={author} linkDisabled />
+    </section>
+
+    <article
+      class="prose pt-4 prose-neutral col-start-2 max-w-none dark:prose-invert"
+    >
+      <Content />
+    </article>
+    
+    <section class="flex flex-col">
+      <h2 class="text-2xl font-semibold">Contributions in Works</h2>
+      <ul class="not-prose flex flex-wrap items-stretch">
+        {
+          contributedWorks.map((work) => (
+            <li class="w-1/3 p-2 sm:w-1/6">
+              <WorkShortcut entry={work} />
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+    <section class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-semibold">Posts by {author.data.title}</h2>
+      {
+        authorPosts.length > 0 ? (
+          <ul class="not-prose flex flex-col gap-4">
+            {authorPosts.map((post) => (
+              <li>
+                <BlogCard entry={post} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="text-muted-foreground">
+            No posts available from this author.
+          </p>
+        )
+      }
+    </section>
+  </Container>
+</Layout>

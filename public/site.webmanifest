@@ -1,0 +1,19 @@
+{
+  "name": "Yshell.dev",
+  "short_name": "yshell",
+  "icons": [
+    {
+      "src": "public/static/logo/mark-bg-black-2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "public/static/logo/gray-mark@2x.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#121212",
+  "background_color": "#121212",
+  "display": "standalone"
+}

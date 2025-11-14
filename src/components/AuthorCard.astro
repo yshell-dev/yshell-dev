@@ -1,0 +1,68 @@
+---
+import Link from '@/components/Link.astro'
+import AvatarComponent from '@/components/ui/avatar'
+import type { Link as SocialLink } from '@/consts'
+import { cn } from '@/lib/utils'
+import type { CollectionEntry } from 'astro:content'
+import SocialIcons from './SocialIcons.astro'
+
+type Props = {
+  author: CollectionEntry<'mention'>
+  linkDisabled?: boolean
+}
+const { author, linkDisabled = false } = Astro.props
+const {
+  title,
+  avatar,
+  description,
+  pronouns,
+  github,
+  linkedin,
+  website,
+  email,
+} = author.data
+
+const socialLinks: SocialLink[] = [
+  website && { href: website, label: 'Globe' },
+  github && { href: github, label: 'GitHub' },
+  linkedin && { href: linkedin, label: 'LinkedIn' },
+  email && { href: email, label: 'Email' },
+].filter(Boolean) as SocialLink[]
+---
+
+<div
+  class="overflow-hidden rounded-xl border p-4 transition-colors duration-300 ease-in-out has-[a:hover]:bg-secondary/50"
+>
+  <div class="flex flex-wrap gap-4">
+    <Link
+      href={`/mentions/${author.data.slug}`}
+      class={cn('block', linkDisabled && 'pointer-events-none')}
+    >
+      <AvatarComponent
+        client:load
+        src={avatar}
+        alt={`Avatar of ${title}`}
+        fallback={title[0]}
+        className={cn(
+          'size-28 rounded-md',
+          !linkDisabled &&
+            'transition-shadow duration-300 hover:cursor-pointer hover:ring-2 hover:ring-primary'
+        )}
+      />
+    </Link>
+    <div class="flex flex-grow flex-col justify-between gap-y-4">
+      <div>
+        <div class="flex flex-wrap items-center gap-x-2">
+          <h3 class="text-lg font-semibold">{title}</h3>
+          {
+            pronouns && (
+              <span class="text-sm text-muted-foreground">({pronouns})</span>
+            )
+          }
+        </div>
+        <p class="text-sm text-muted-foreground">{description}</p>
+      </div>
+      <SocialIcons links={socialLinks} />
+    </div>
+  </div>
+</div>

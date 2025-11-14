@@ -1,0 +1,81 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+// import {
+//   Card,
+//   CardContent,
+//   CardDescription,
+//   CardHeader,
+//   CardTitle,
+// } from '@/components/ui/card'
+import { SITE, SOCIAL_LINKS_MAP } from '@/consts'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+import logo_white from '../../public/static/logo/mark-white.svg'
+import logo_black from '../../public/static/logo/mark-black.svg'
+---
+
+<Layout title="About" description={SITE.DESCRIPTION}>
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs items={[{ label: 'About', icon: 'lucide:info' }]} />
+    <!-- <section>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">職人</CardTitle>
+          <CardDescription
+            >/sho·ku·nin/ &bull; <span class="font-semibold">noun</span
+            ></CardDescription
+          >
+        </CardHeader>
+        <CardContent>
+          <p class="mb-2 text-sm text-muted-foreground">
+            The concept of combining creativity with technical skills in coding,
+            akin to an artist, can be encapsulated in the Japanese term
+            <span class="text-foreground">"Shokunin" (職人)</span>.
+          </p>
+        </CardContent>
+      </Card>
+    </section> -->
+    <section class="flex md:justify-end">
+      <div class="flex min-w-full flex-col items-start gap-8 py-6 sm:flex-row">
+        <Image src={logo_black} alt="profile" class="block dark:hidden my-4 w-1/3" />
+        <Image src={logo_white} alt="profile" class="hidden dark:block my-4 w-1/3" />
+
+        <div class="prose prose-neutral mb-8 mt-2 dark:prose-invert">
+          <p class="mb-4">
+            Hey, <b>Vyshnav</b> here.
+          </p>
+          <p class="mb-4">
+            I'm an Electronics Engineering graduate.
+          </p>
+
+          <!-- <h2 class="mb-4 text-2xl font-semibold">Experience</h2> -->
+          <!-- <ul>
+          </ul> -->
+          <h2 class="mb-4 text-2xl font-semibold">Get in touch</h2>
+          <ul class="list-none px-0">
+            <li>
+              <a
+                href="https://www.linkedin.com/in/vyshnavprasad-mullassery/"
+                class="flex items-center gap-3"
+              >
+                <Icon name="lucide:linkedin" class="size-4" />
+                vyshnavprasad-mullassery
+              </a>
+            </li>
+            <li>
+              <a
+                class="flex items-center gap-3"
+                href="mailto:{vyshnav.prasad@gmail.com}"
+              >
+                <Icon name="lucide:mail" class="size-4" />
+                {SOCIAL_LINKS_MAP['Email']}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </Container>
+</Layout>

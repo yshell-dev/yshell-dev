@@ -1,0 +1,28 @@
+---
+import AuthorCard from '@/components/AuthorCard.astro'
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getCollection, type CollectionEntry } from 'astro:content'
+
+const mentions = await getCollection('mention')
+---
+
+<Layout title="Mentions" description="People mentioned in this site">
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs items={[{ label: 'Mentions', icon: 'lucide:users' }]} />
+    {
+      mentions.length > 0 ? (
+        <ul class="not-prose flex flex-col gap-4">
+          {mentions.map((mention: CollectionEntry<'mention'>) => (
+            <li>
+              <AuthorCard author={mention} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="text-center text-muted-foreground">No authors found.</p>
+      )
+    }
+  </Container>
+</Layout>

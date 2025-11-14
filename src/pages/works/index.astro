@@ -1,0 +1,28 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import WorkCard from '@/components/WorkCard.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getCollection } from 'astro:content'
+
+const works = (await getCollection('work')).filter((post) => !post.data.draft)
+---
+
+<Layout title="Works" description="Contributing Projects.">
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs items={[{ label: 'Works', icon: 'lucide:briefcase' }]} />
+    <section class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-bold">Works</h2>
+      <ul class="flex flex-wrap items-stretch">
+        {
+          works.map((work) => (
+            <li class="w-full gap-4 sm:w-1/2">
+              {' '}
+              <WorkCard entry={work} />
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </Container>
+</Layout>

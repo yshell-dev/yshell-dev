@@ -1,0 +1,41 @@
+---
+import { Separator } from '@/components/ui/separator'
+import { formatDate } from '@/lib/utils'
+import { Image } from 'astro:assets'
+import type { CollectionEntry } from 'astro:content'
+import Link from './Link.astro'
+
+const { entry } = Astro.props as {
+  entry: CollectionEntry<'work'>
+}
+
+const formattedDate = formatDate(entry.data.date)
+---
+
+<div class="not-prose h-full transition-colors duration-300 ease-in-out">
+  <Link
+    href={`/works/${entry.id}`}
+    class="flex h-full flex-col gap-6 rounded-xl border p-6 hover:bg-secondary/50"
+  >
+    <div class="w-1/5 min-w-24 max-w-32 sm:flex-shrink-0">
+      <Image src={entry.data.logo} inferSize={true} alt={entry.data.slug} class="object-cover" />
+    </div>
+    <div class="flex-grow pr-4">
+      <h3 class="mb-1 text-xl font-semibold">
+        {entry.data.title}
+      </h3>
+      <div
+        class="mb-2 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground"
+      >
+        <span>{entry.data.version}</span>
+        <Separator orientation="vertical" className="h-4" />
+        <span>
+          {formattedDate}
+        </span>
+      </div>
+      <p class="my-4 text-sm text-muted-foreground">
+        {entry.data.description}
+      </p>
+    </div>
+  </Link>
+</div>
