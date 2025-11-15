@@ -5,7 +5,6 @@
 name: Publish Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ['main']
   repository_dispatch:
@@ -38,6 +37,31 @@ jobs:
         with:
             submodules: recursive
             token: ${{ secrets.GH_PERSONAL }}
+
+      # Sync submodule at src/content, and sync it to latest and push to yshell-dev 
+      - name: Sync and push submodule updates at src/content
+        run: |
+          cd src/content
+          git fetch origin
+          LATEST_REMOTE=$(git rev-parse origin/main)
+          CURRENT_HEAD=$(git rev-parse HEAD)
+          if [ "$LATEST_REMOTE" != "$CURRENT_HEAD" ]; then
+            git checkout $LATEST_REMOTE
+            cd ../..
+            git add src/content
+            git commit -m "Update submodule src/content to latest"
+            git push origin main
+          else
+            echo "Submodule src/content is already up-to-date."
+          fi
+        env:
+          GIT_AUTHOR_NAME: github-actions
+          GIT_AUTHOR_EMAIL: github-actions@github.com
+          GIT_COMMITTER_NAME: github-actions
+          GIT_COMMITTER_EMAIL: github-actions@github.com
+          # Use token for authentication in git push
+          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL }}
+
       - name: Detect package manager
         id: detect-package-manager
         run: |
